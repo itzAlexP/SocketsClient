@@ -22,6 +22,11 @@ sInfo;
 size_t
 received;
 
+bool
+bVerified = false,
+bVerifiedPassword = false;
+
+
 int main()
 {
 
@@ -33,30 +38,71 @@ int main()
     if(status != sf::Socket::Done)
     {
 
-      std::cout << "Error de conexión con el servidor." << std::endl;
-      return 0;
+        std::cout << "Error de conexión con el servidor." << std::endl;
+        return 0;
 
     }
 
-    //Enviamos nombre de usuario al servidor
-    cout << "Inserte nombre de usuario." << std::endl;
-    cin >> sInfo;
-    status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+    //Repètiremos login hasta que sea valido
+    while(!bVerified)
+    {
 
-    //Esperamos respuesta del servidor
-    status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
-    std::cout << cBufferSocket << std::endl;
+        //Enviamos nombre de usuario al servidor
+        cout << "Inserte nombre de usuario." << std::endl;
+        cin >> sInfo;
+        status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
 
-    //Existe usuario
-    if(cBufferSocket[0] == '0'){
+        //Esperamos respuesta del servidor
+        status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
 
-    system("clear");
-    cout << "Inserte password." << std::endl;
-    cin >> sInfo;
-    status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+        //Existe usuario
+        if(cBufferSocket[0] == '0')
+        {
 
+            //Pedimos la contraseña y la enviamos al servidor
+            system("clear");
+            cout << "Inserte password." << std::endl;
+            cin >> sInfo;
+            status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
+            //Esperamos respuesta del servidor
+            status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+
+            //Contraseña correcta
+            if(cBufferSocket[0] == '0')
+            {
+
+                bVerified = true;
+
+
+            }//Contraseña incorrecta
+            else
+            {
+
+                //Preguntaremos la contraseña hasta que la introduzca correctamente
+                while(!bVerifiedPassword)
+                {
+
+                    cout << "Contraseña incorrecta, introduzcala de nuevo." << std::endl;
+                    cin >> sInfo;
+
+                    status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
+                    //Esperamos respuesta del servidor
+                    status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+
+                    if(cBufferSocket[0] == '0')
+                    {
+
+                        bVerified = true;
+                        bVerifiedPassword = true;
+
+                    }
+                }
+
+            }
+        }
     }
-
 
     return 0;
 }
