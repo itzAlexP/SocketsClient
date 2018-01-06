@@ -35,7 +35,8 @@ bool
 bVerified = false,
 bVerifiedPassword = false,
 bVerifiedNewUser = false,
-bVerifiedRace = false;
+bVerifiedRace = false,
+bVerifiedCharacterName = false;
 
 
 int main()
@@ -220,7 +221,7 @@ int main()
                         status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
                         bVerifiedRace = true;
 
-                   }
+                    }
                 }
 
                 if(!bVerifiedRace)
@@ -232,9 +233,52 @@ int main()
 
             }
 
+
             std::cout << "\nInserte nombre del personaje" << std::endl;
-            std::cin >> sInfo;
+
+
+
+            //Enviamos el nombre del personaje
+            cin >> sInfo;
             status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
+            //Esperamos respuesta del servidor
+            status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+
+            //Nombre Ocupado
+            if(cBufferSocket[0] == '1')
+            {
+                //Mientras no pongga un nombre valido.
+                while(!bVerifiedCharacterName)
+                {
+
+                    //Enviamos nombre al servidor
+                    std::cout << "\nNombre no disponible, inserte otro nombre." << std::endl;
+                    cin >> sInfo;
+                    status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
+                    //Esperamos respuesta del servidor
+                    status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+
+                    //Si el nombre esta libre
+                    if(cBufferSocket[0] == '0')
+                    {
+
+                        bVerifiedCharacterName = true;
+                    }
+                }
+
+            }
+
+
+
+
+
+
+
+
+
+
 
 
         }
