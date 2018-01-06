@@ -24,7 +24,8 @@ received;
 
 bool
 bVerified = false,
-bVerifiedPassword = false;
+bVerifiedPassword = false,
+bVerifiedNewUser = false;
 
 
 int main()
@@ -102,9 +103,69 @@ int main()
 
             }
         }
+        else if (cBufferSocket[0] == '2') //Registro de usuario
+        {
+            //Pedimos la contraseña y la enviamos al servidor
+            system("clear");
+            std::cout << "\nNo existe dicho usuario. Se va a proceder a crear un nuevo usuario.\n" << "\nInserte nombre de usuario" <<std::endl;
+            cin >> sInfo;
+            status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
+             //Esperamos respuesta del servidor
+            status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+
+            //Usuario nuevo existe
+            if(cBufferSocket[0] == '1')
+            {
+                while(!bVerifiedNewUser)
+                {
+                    std::cout << "Usuario ya en uso, inserte otro nombre de usuario." << std::endl;
+                    cin >> sInfo;
+
+                    status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
+                    //Esperamos respuesta del servidor
+                    status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+
+                    if(cBufferSocket[0] == '0')
+                    {
+                        bVerifiedNewUser = true;
+                    }
+                }
+            }
+
+            system("clear");
+            std::cout << "\nUsuario disponible, inserte contraseña.\n";
+
+            while(!bVerifiedPassword)//Repetimos hasta tener una contraseña valida
+            {
+
+                //Pedimos al usuario que escriba la contraseña
+                std::cin >> sInfo;
+                status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
+                std::cout << "\nRepita contraseña.\n";
+                std::cin >> sInfo;
+                status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
+                //Esperamos respuesta del servidor
+                status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+
+                if(cBufferSocket[0] == '0')
+                {
+                    bVerifiedPassword = true;
+                }
+                else if(cBufferSocket[0] == '1')//Las contraseñas no coinciden
+                {
+                    std::cout << "\nLas contraseñas no coinciden, introduzca de nuevo la contraseña.\n";
+                }
+            }
+
+            system("clear");
+
+            //RAZAS
+        }
     }
 
     return 0;
 }
-
-
