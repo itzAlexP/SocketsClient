@@ -1,23 +1,32 @@
 #include <iostream>
 #include <SFML/Network.hpp>
 #include <unistd.h>
+#include <vector>
 
 #define SERVER_IP "192.168.88.138"
 #define SERVER_PORT 5000
 
 using namespace std;
 
+std::vector<string>
+vRazas;
+
 sf::TcpSocket
 socket;
 
 char
-cBufferSocket[100];
+cBufferSocket[100],
+              cBufferSocketLong[2000];
 
+
+int
+iCounter = 0;
 
 std::string
 sUserNick,
 sUserPass,
-sInfo;
+sInfo,
+sRazas;
 
 size_t
 received;
@@ -25,7 +34,8 @@ received;
 bool
 bVerified = false,
 bVerifiedPassword = false,
-bVerifiedNewUser = false;
+bVerifiedNewUser = false,
+bVerifiedRace = false;
 
 
 int main()
@@ -111,7 +121,7 @@ int main()
             cin >> sInfo;
             status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
 
-             //Esperamos respuesta del servidor
+            //Esperamos respuesta del servidor
             status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
 
             //Usuario nuevo existe
@@ -163,7 +173,70 @@ int main()
 
             system("clear");
 
-            //RAZAS
+            //Seleccionamos raza para el personaje
+            status = socket.receive(cBufferSocketLong, sizeof(cBufferSocketLong), received);
+
+
+            std::cout << "Selecciona raza\n" << std::endl;
+
+            for(int i = 0; i < sizeof(cBufferSocketLong); i ++)
+            {
+
+                if(cBufferSocketLong[i] != '-')
+                {
+
+                    sRazas =  sRazas + cBufferSocketLong[i];
+
+                }
+
+                if(cBufferSocketLong[i] == '-')
+                {
+
+
+                    vRazas.push_back(sRazas);
+                    sRazas.clear();
+
+                }
+
+            }
+
+            for(int i = 0; i < vRazas.size() / 2; i++, iCounter =  iCounter + 2)
+            {
+
+                std::cout << vRazas[iCounter] << "    |    " << vRazas[iCounter + 1] << std::endl;
+
+            }
+
+            while(!bVerifiedRace)
+            {
+
+                cin >> sInfo;
+
+                for(int i = 0; i < vRazas.size(); i = i+2)
+                {
+
+                    if(vRazas[i] == sInfo)
+                    {
+                        status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+                        bVerifiedRace = true;
+
+                   }
+                }
+
+                if(!bVerifiedRace)
+                {
+
+                    std::cout << "\n Raza no valida, seleccione una de las listadas." << std::endl;
+
+                }
+
+            }
+
+            std::cout << "\nInserte nombre del personaje" << std::endl;
+            std::cin >> sInfo;
+            status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
+
         }
     }
 
