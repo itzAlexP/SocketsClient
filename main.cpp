@@ -9,7 +9,8 @@
 using namespace std;
 
 std::vector<string>
-vRazas;
+vRazas,
+vPersonajes;
 
 sf::TcpSocket
 socket;
@@ -26,7 +27,8 @@ std::string
 sUserNick,
 sUserPass,
 sInfo,
-sRazas;
+sRazas,
+sPersonajes;
 
 size_t
 received;
@@ -36,7 +38,8 @@ bVerified = false,
 bVerifiedPassword = false,
 bVerifiedNewUser = false,
 bVerifiedRace = false,
-bVerifiedCharacterName = false;
+bVerifiedCharacterName = false,
+bSelectedCharacter = false;
 
 
 int main()
@@ -44,7 +47,6 @@ int main()
 
 
     sf::Socket::Status status = socket.connect(SERVER_IP, SERVER_PORT, sf::seconds(15.f));
-
 
     //El cliente se intentara conectar todo el rato cada 15 segundos hasta conseguirlo.
     if(status != sf::Socket::Done)
@@ -208,6 +210,7 @@ int main()
 
             }
 
+            //Comprobamos las razas disponibles ENVIADAS y COMPROBADAS por el servidor
             while(!bVerifiedRace)
             {
 
@@ -248,7 +251,7 @@ int main()
             //Nombre Ocupado
             if(cBufferSocket[0] == '1')
             {
-                //Mientras no pongga un nombre valido.
+                //Mientras no ponga un nombre valido.
                 while(!bVerifiedCharacterName)
                 {
 
@@ -267,20 +270,120 @@ int main()
                         bVerifiedCharacterName = true;
                     }
                 }
+            }
+        }
+
+
+        //Listamos personajes del jugador
+
+        system("clear");
+
+        status = socket.receive(cBufferSocketLong, sizeof(cBufferSocketLong), received);
+
+
+        std::cout << "Seleccione personaje. Para crear un personaje nuevo escriba Nuevo\n" << std::endl;
+
+        for(int i = 0; i < sizeof(cBufferSocketLong); i ++)
+        {
+
+            if(cBufferSocketLong[i] != '-')
+            {
+
+                sPersonajes =  sPersonajes + cBufferSocketLong[i];
 
             }
 
+            if(cBufferSocketLong[i] == '-')
+            {
+
+
+                vPersonajes.push_back(sPersonajes);
+                sPersonajes.clear();
+
+            }
+
+        }
+
+        for(int i = 0; i < vPersonajes.size(); i++)
+        {
+
+            std::cout << vPersonajes[i] << std::endl;
+
+        }
+
+        //Comprobamos los personajes disponibles ENVIADOS y COMPROBADOS por el SERVIDOR
+        while(!bSelectedCharacter)
+        {
+
+            cin >> sInfo;
+
+
+            if(sInfo == "Nuevo" || sInfo == "nuevo")
+            {
+
+            status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
+
+
+            }
+            else
+            {
+                for(int i = 0; i < vPersonajes.size(); i++)
+                {
+
+                    if(vPersonajes[i] == sInfo)
+                    {
+                        status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+                        bSelectedCharacter = true;
+
+                    }
+                }
+            }
+
+
+            if(!bSelectedCharacter)
+            {
+
+                std::cout << "\n Personaje no valido, seleccione uno de los listados." << std::endl;
+
+            }
+
+        }
 
 
 
 
 
 
+        //Enviamos el nombre del personaje
+        cin >> sInfo;
+        status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
 
+        //Esperamos respuesta del servidor
+        status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
 
+        //Nombre Ocupado
+        if(cBufferSocket[0] == '1')
+        {
+            //Mientras no ponga un nombre valido.
+            while(!bVerifiedCharacterName)
+            {
 
+                //Enviamos nombre al servidor
+                std::cout << "\nNombre no disponible, inserte otro nombre." << std::endl;
+                cin >> sInfo;
+                status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
 
+                //Esperamos respuesta del servidor
+                status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
 
+                //Si el nombre esta libre
+                if(cBufferSocket[0] == '0')
+                {
+
+                    bVerifiedCharacterName = true;
+                }
+            }
         }
     }
 
