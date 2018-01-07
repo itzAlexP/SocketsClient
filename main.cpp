@@ -125,6 +125,7 @@ void CrearPersonaje()
     //Esperamos respuesta del servidor
     status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
 
+
     //Nombre Ocupado
     if(cBufferSocket[0] == '1')
     {
@@ -343,10 +344,6 @@ int main()
 
                     status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
                     CrearPersonaje();
-
-
-
-
 
                 }
                 else
