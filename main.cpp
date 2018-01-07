@@ -17,7 +17,7 @@ socket;
 
 char
 cBufferSocket[100],
-              cBufferSocketLong[2000];
+cBufferSocketLong[2000];
 
 
 int
@@ -278,24 +278,20 @@ int main()
 
         system("clear");
 
-        status = socket.receive(cBufferSocketLong, sizeof(cBufferSocketLong), received);
-
-
         std::cout << "Seleccione personaje. Para crear un personaje nuevo escriba Nuevo\n" << std::endl;
 
-        for(int i = 0; i < sizeof(cBufferSocketLong); i ++)
+        for(int i = 0; i < sizeof(cBufferSocket); i ++)
         {
 
-            if(cBufferSocketLong[i] != '-')
+            if(cBufferSocket[i] != '-')
             {
 
-                sPersonajes =  sPersonajes + cBufferSocketLong[i];
+                sPersonajes =  sPersonajes + cBufferSocket[i];
 
             }
 
-            if(cBufferSocketLong[i] == '-')
+            if(cBufferSocket[i] == '-')
             {
-
 
                 vPersonajes.push_back(sPersonajes);
                 sPersonajes.clear();
