@@ -9,7 +9,8 @@
 using namespace std;
 
 std::vector<string>
-vPersonajes;
+vPersonajes,
+vDirecciones;
 
 sf::TcpSocket
 socket;
@@ -19,8 +20,7 @@ status;
 
 char
 cBufferSocket[100],
-cBufferSocketLong2[2000];
-
+              cBufferSocketLong2[2000];
 
 int
 iCounter = 0;
@@ -29,7 +29,8 @@ std::string
 sUserNick,
 sUserPass,
 sInfo,
-sPersonajes;
+sPersonajes,
+sDirecciones;
 
 size_t
 received;
@@ -55,6 +56,8 @@ void CrearPersonaje()
     iCounter = 0;
 
     system("clear");
+
+
 
     //Seleccionamos raza para el personaje
     status = socket.receive(cBufferSocketLong, sizeof(cBufferSocketLong), received);
@@ -377,8 +380,54 @@ int main()
 
 
 
-    std::cout << "ggogo power rangger" << std::endl;
-    cin>> sInfo;
+    //Ingame
+    system("clear");
+    std::cout << "Empieza el juego!" << std::endl << std::endl << std::endl;
+
+    while(sInfo != "quit")
+    {
+
+        //Imprimimos descripcion.
+        status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+        std::cout << cBufferSocket << std::endl;
+
+        std::cout << "Donde quieres ir?\n" << std::endl;
+
+        //Recibimos direcciones del servidor
+        status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+
+        sDirecciones.clear();
+        for(int i = 0; i < sizeof(cBufferSocket); i ++)
+        {
+
+            if(cBufferSocket[i] != '-')
+            {
+
+                sDirecciones =  sDirecciones + cBufferSocket[i];
+
+            }
+
+            if(cBufferSocket[i] == '-')
+            {
+
+
+                vDirecciones.push_back(sDirecciones);
+                sDirecciones.clear();
+
+            }
+
+        }
+
+        for(int i = 0; i < vDirecciones.size(); i++)
+        {
+
+            std::cout << vDirecciones[i] << std::endl;
+
+        }
+
+    }
+
+
 
 
     return 0;
