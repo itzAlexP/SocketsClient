@@ -42,7 +42,9 @@ bVerifiedNewUser = false,
 bVerifiedRace = false,
 bVerifiedCharacterName = false,
 bSelectedCharacter = false,
-bSelectedListCharacter = false;
+bSelectedListCharacter = false,
+bVerifiedDirection = false;
+
 
 
 void CrearPersonaje()
@@ -378,8 +380,6 @@ int main()
         }
     }
 
-
-
     //Ingame
     system("clear");
     std::cout << "Empieza el juego!" << std::endl << std::endl << std::endl;
@@ -390,7 +390,6 @@ int main()
         //Imprimimos descripcion.
         status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
         std::cout << cBufferSocket << std::endl;
-
         std::cout << "Donde quieres ir?\n" << std::endl;
 
         //Recibimos direcciones del servidor
@@ -421,14 +420,42 @@ int main()
         for(int i = 0; i < vDirecciones.size(); i++)
         {
 
-            std::cout << vDirecciones[i] << std::endl;
+            std::cout << vDirecciones[i] << std::endl << std::endl;
 
         }
 
+
+
+        bVerifiedDirection = false;
+        //Enviamos al servidor la opcion del jugador
+        while(!bVerifiedDirection)
+        {
+            cin >> sInfo;
+
+            for(int i = 0; i < vDirecciones.size(); i++)
+            {
+
+                if(sInfo == vDirecciones[i] || sInfo == "quit")
+                {
+
+                    bVerifiedDirection = true;
+
+                }
+            }
+
+            if(!bVerifiedDirection)
+            {
+
+                std::cout << "Direccion no valida, introduzca una de las listadas." << std::endl;
+
+            }
+        }
+
+        vDirecciones.clear();
+        system("clear");
+        status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
     }
-
-
-
 
     return 0;
 }
