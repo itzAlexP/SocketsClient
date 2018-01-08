@@ -59,8 +59,6 @@ void CrearPersonaje()
 
     system("clear");
 
-
-
     //Seleccionamos raza para el personaje
     status = socket.receive(cBufferSocketLong, sizeof(cBufferSocketLong), received);
 
@@ -87,6 +85,7 @@ void CrearPersonaje()
 
     }
 
+    //Mostramos razas
     for(int i = 0; i < vRazas.size() / 2; i++, iCounter =  iCounter + 2)
     {
 
@@ -94,7 +93,7 @@ void CrearPersonaje()
 
     }
 
-    //Comprobamos las razas disponibles ENVIADAS y COMPROBADAS por el servidor
+    //Comprobamos las razas disponibles enviadas y comprobadas por el servidor
     while(!bVerifiedRace)
     {
 
@@ -162,10 +161,9 @@ void CrearPersonaje()
 int main()
 {
 
-
+    //Realizamos conexion
     status = socket.connect(SERVER_IP, SERVER_PORT, sf::seconds(15.f));
 
-    //El cliente se intentara conectar todo el rato cada 15 segundos hasta conseguirlo.
     if(status != sf::Socket::Done)
     {
 
@@ -199,12 +197,12 @@ int main()
             //Esperamos respuesta del servidor
             status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
 
-            std::cout << "Recibida password" << std::endl;
             //Contraseña correcta
             if(cBufferSocket[0] == '0')
             {
 
                 bVerified = true;
+
                 //Esperamos respuesta del servidor
                 status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
 
@@ -230,6 +228,7 @@ int main()
 
                         bVerified = true;
                         bVerifiedPassword = true;
+                        status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
 
                     }
                 }
@@ -292,10 +291,11 @@ int main()
                 {
                     std::cout << "\nLas contraseñas no coinciden, introduzca de nuevo la contraseña.\n";
                 }
-                CrearPersonaje();
-                bVerified = true;
+
 
             }
+            CrearPersonaje();
+            bVerified = true;
 
         }
 
@@ -337,13 +337,13 @@ int main()
 
             }
 
-            //Comprobamos los personajes disponibles ENVIADOS y COMPROBADOS por el SERVIDOR
+            //Comprobamos los personajes disponibles enviados y comprobados por el servidor
             while(!bSelectedCharacter)
             {
 
                 cin >> sInfo;
 
-
+                //Creamos personaje nuevo
                 if(sInfo == "Nuevo" || sInfo == "nuevo")
                 {
 
@@ -384,16 +384,22 @@ int main()
     system("clear");
     std::cout << "Empieza el juego!" << std::endl << std::endl << std::endl;
 
+
     while(sInfo != "quit")
     {
 
+
         //Imprimimos descripcion.
         status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+
         std::cout << cBufferSocket << std::endl;
+
         std::cout << "Donde quieres ir?\n" << std::endl;
 
         //Recibimos direcciones del servidor
         status = socket.receive(cBufferSocket, sizeof(cBufferSocket), received);
+
+
 
         sDirecciones.clear();
         for(int i = 0; i < sizeof(cBufferSocket); i ++)
@@ -417,6 +423,7 @@ int main()
 
         }
 
+        //Mostramos direcciones
         for(int i = 0; i < vDirecciones.size(); i++)
         {
 
@@ -424,9 +431,8 @@ int main()
 
         }
 
-
-
         bVerifiedDirection = false;
+
         //Enviamos al servidor la opcion del jugador
         while(!bVerifiedDirection)
         {
@@ -454,6 +460,7 @@ int main()
         vDirecciones.clear();
         system("clear");
         status = socket.send(sInfo.c_str(), sizeof(sInfo) + 1);
+
 
     }
 
